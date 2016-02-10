@@ -12,7 +12,32 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    var lastName:String!
+    var firstName:String!
+    var userId:String!
 
+    func showAlert(parent:UIViewController,title:String,message:String){
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .Alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: { (action:UIAlertAction!) -> Void in
+            // Do nothing
+        }))
+        parent.presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    func logOut(sender:UIViewController) {
+        let userManager = UserManager()
+        userManager.logout({(data) in
+            dispatch_async(dispatch_get_main_queue()) {
+                let controller = sender.storyboard!.instantiateViewControllerWithIdentifier("LoginController")
+                sender.presentViewController(controller, animated: true, completion: nil)
+            }
+            },fail : {(message) in
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.showAlert(sender, title: "Failed to logout", message: message)
+                }
+        })
+    }
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
