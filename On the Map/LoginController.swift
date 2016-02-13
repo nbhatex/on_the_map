@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import FBSDKCoreKit
+import FBSDKLoginKit
 
 class ViewController: UIViewController {
 
@@ -52,33 +54,50 @@ class ViewController: UIViewController {
         
         activityIndicator.hidden = false
         activityIndicator.startAnimating()
-        userManager.login(loginTextfield.text!,password: passwordTextfield.text!,sucess: {(parsedData) in
+        userManager.login(loginTextfield.text!,password: passwordTextfield.text!,success: self.handleLoginSuccess, fail: self.handleFailure
             
-            print(parsedData)
-            let userId = parsedData["account"]!["key"] as? String
-            appDelegate.userId = userId
-            print(userId)
-            self.userManager.getUserData(userId!,sucess: {(parsedUserData) in
-                let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-                appDelegate.lastName = parsedUserData["user"]!!["last_name"] as? String
-                appDelegate.firstName = parsedUserData["user"]!!["first_name"] as? String
-                
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.stopAndHideActivityIndicator()
-                    let controller = self.storyboard!.instantiateViewControllerWithIdentifier("TabBarController") as! UITabBarController
-                    self.presentViewController(controller, animated: true, completion: nil)
-                })
-                
-                },fail: self.handleFailure)
-        }, fail: self.handleFailure
         )
         
         
     }
     
     @IBAction func loginWithFacebook(sender: UIButton) {
-        userManager.loginWithFacebook()
+        //userManager.loginWithFacebook()
         
+        let fbLoginManager  = FBSDKLoginManager()
+        fbLoginManager.logInWithReadPermissions(["public_profile"], fromViewController: self, handler: {(facebookResult, facebookError) -> Void in
+            guard facebookError == nil else {
+                self.handleFailure(facebookError.localizedDescription)
+                return
+            }
+            guard !facebookResult.isCancelled else {
+                self.handleFailure("Login Cancelled")
+                return
+            }
+            self.userManager.loginWithFacebook(FBSDKAccessToken.currentAccessToken().tokenString,success: self.handleLoginSuccess,fail: self.handleFailure)
+        })
+        
+        
+    }
+    
+    func handleLoginSuccess(parsedData:[String:AnyObject]) {
+        print(parsedData)
+        let appDelegate = (UIApplication.sharedApplication().delegate as? AppDelegate)!
+        let userId = parsedData["account"]!["key"] as? String
+        appDelegate.userId = userId
+        print(userId)
+        self.userManager.getUserData(userId!,success: {(parsedUserData) in
+            let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            appDelegate.lastName = parsedUserData["user"]!["last_name"] as? String
+            appDelegate.firstName = parsedUserData["user"]!["first_name"] as? String
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                self.stopAndHideActivityIndicator()
+                let controller = self.storyboard!.instantiateViewControllerWithIdentifier("TabBarController") as! UITabBarController
+                self.presentViewController(controller, animated: true, completion: nil)
+            })
+            
+            },fail: self.handleFailure)
     }
     func handleFailure(message:String) {
         dispatch_async(dispatch_get_main_queue()) {
