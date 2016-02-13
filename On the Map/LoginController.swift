@@ -14,7 +14,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var loginTextfield: UITextField!
     @IBOutlet weak var passwordTextfield: UITextField!
-    @IBOutlet weak var messageTextField: UILabel!
+    @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var signUpLabel: UILabel!
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
@@ -25,6 +25,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         let tapGesture = UITapGestureRecognizer(target: self, action: "tapSignUp")
         signUpLabel.addGestureRecognizer(tapGesture)
+        messageLabel.numberOfLines = 0
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -38,7 +39,7 @@ class ViewController: UIViewController {
 
     @IBAction func clickLogin(sender: AnyObject) {
         
-        messageTextField.text = ""
+        messageLabel.text = ""
         
         let appDelegate = (UIApplication.sharedApplication().delegate as? AppDelegate)!
 
@@ -51,18 +52,23 @@ class ViewController: UIViewController {
             return
         }
         
-        
-        activityIndicator.hidden = false
-        activityIndicator.startAnimating()
-        userManager.login(loginTextfield.text!,password: passwordTextfield.text!,success: self.handleLoginSuccess, fail: self.handleFailure
-            
-        )
-        
-        
+        startActivityIndicator()
+        userManager.login(loginTextfield.text!,password: passwordTextfield.text!,success: self.handleLoginSuccess, fail: self.handleFailure)
     }
     
     @IBAction func loginWithFacebook(sender: UIButton) {
-        //userManager.loginWithFacebook()
+        messageLabel.text = ""
+        
+        let appDelegate = (UIApplication.sharedApplication().delegate as? AppDelegate)!
+        
+        guard let text = loginTextfield.text where text.isEmpty else  {
+            appDelegate.showAlert(self,title: "Invalid input",message: "Did not specify exactly one credential")
+            return
+        }
+        guard let ptext = passwordTextfield.text where ptext.isEmpty else {
+            appDelegate.showAlert(self,title: "Invalid input", message: "Did not specify exactly one credential")
+            return
+        }
         
         let fbLoginManager  = FBSDKLoginManager()
         fbLoginManager.logInWithReadPermissions(["public_profile"], fromViewController: self, handler: {(facebookResult, facebookError) -> Void in
@@ -74,6 +80,7 @@ class ViewController: UIViewController {
                 self.handleFailure("Login Cancelled")
                 return
             }
+            self.startActivityIndicator()
             self.userManager.loginWithFacebook(FBSDKAccessToken.currentAccessToken().tokenString,success: self.handleLoginSuccess,fail: self.handleFailure)
         })
         
@@ -85,8 +92,7 @@ class ViewController: UIViewController {
         let appDelegate = (UIApplication.sharedApplication().delegate as? AppDelegate)!
         let userId = parsedData["account"]!["key"] as? String
         appDelegate.userId = userId
-        print(userId)
-        self.userManager.getUserData(userId!,success: {(parsedUserData) in
+        userManager.getUserData(userId!,success: {(parsedUserData) in
             let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
             appDelegate.lastName = parsedUserData["user"]!["last_name"] as? String
             appDelegate.firstName = parsedUserData["user"]!["first_name"] as? String
@@ -102,11 +108,18 @@ class ViewController: UIViewController {
     func handleFailure(message:String) {
         dispatch_async(dispatch_get_main_queue()) {
             self.stopAndHideActivityIndicator()
-            self.messageTextField.text = message
+            self.messageLabel.text = message
         }
     }
     
+    func startActivityIndicator() {
+        view.alpha = 0.5
+        activityIndicator.hidden = false
+        activityIndicator.startAnimating()
+    }
+    
     func stopAndHideActivityIndicator() {
+        view.alpha = 1.0
         activityIndicator.stopAnimating()
         activityIndicator.hidden = true
     }

@@ -27,23 +27,21 @@ class InfoPostViewController: UIViewController {
     }
     
     @IBAction func findOnMap(sender: UIButton) {
-        let appDelegate = UIApplication.sharedApplication().delegate as? AppDelegate
+        let appDelegate = (UIApplication.sharedApplication().delegate as? AppDelegate)!
         
         if sender.currentTitle == "Find on the Map" {
 
             guard let text = placeTextfield.text where !text.isEmpty else  {
-                appDelegate?.showAlert(self, title: "Find location", message: "Please provide location value")
+                appDelegate.showAlert(self, title: "Find location", message: "Please provide location value")
                 return
             }
             
             let geocoder = CLGeocoder()
-            activityIndicator.hidden = false
-            activityIndicator.startAnimating()
+            showActivityIndicator()
             geocoder.geocodeAddressString(placeTextfield.text!, completionHandler: {(placemarks,error) in
-                self.activityIndicator.hidden = true
-                self.activityIndicator.stopAnimating()
+                self.hideActivityIndicator()
                 guard error == nil else {
-                    appDelegate?.showAlert(self, title: "Find location", message: "Could not find the location \(self.placeTextfield.text!)")
+                    appDelegate.showAlert(self, title: "Find location", message: "Could not find the location \(self.placeTextfield.text!)")
                     return
                 }
                 self.buttonHolderView.backgroundColor = UIColor(colorLiteralRed: 0, green: 0, blue: 0, alpha: 0.1)
@@ -72,18 +70,26 @@ class InfoPostViewController: UIViewController {
                 
             })
         } else {
+            guard let text = urlTextField.text where !text.isEmpty else  {
+                appDelegate.showAlert(self,title: "Invalid input",message: "Pleave provide the URL")
+                return
+            }
+            
             info["mediaURL"] = urlTextField.text
             let studentManager = StudentManager()
             let studentInfo = StudentInformation(dictionary: info)
+            self.showActivityIndicator()
             studentManager.submitStudentInformation(studentInfo, success: {(data) in
                 dispatch_async(dispatch_get_main_queue(), {
+                    self.hideActivityIndicator()
                     sender.setTitle("Find on the Map", forState: .Normal)
                     self.returnToTabView()
                 })
                 
                 }, fail: {(message) in
                     dispatch_async(dispatch_get_main_queue(), {
-                        appDelegate?.showAlert(self, title: "Submit Location", message: message)
+                        self.hideActivityIndicator()
+                        appDelegate.showAlert(self, title: "Submit Location", message: message)
                     })
             })
         }
@@ -104,4 +110,17 @@ class InfoPostViewController: UIViewController {
         info = [String:AnyObject]()
         activityIndicator.hidden = true
     }
+    
+    func showActivityIndicator() {
+        view.alpha = 0.5
+        activityIndicator.hidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    func hideActivityIndicator() {
+        view.alpha = 1.0
+        self.activityIndicator.hidden = true
+        self.activityIndicator.stopAnimating()
+    }
+    
 }

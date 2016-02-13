@@ -8,11 +8,15 @@
 
 import Foundation
 
+let SESSION_API_URL = "https://www.udacity.com/api/session"
+let USERS_API_BASE_URL = "https://www.udacity.com/api/users/"
+
 class UserManager {
     
+    let session = NSURLSession.sharedSession()
+    
     func login(username:String,password:String,success:([String:AnyObject])-> (), fail:(String)->()) {
-        let urlString = "https://www.udacity.com/api/session"
-        let url = NSURL(string: urlString)
+        let url = NSURL(string: SESSION_API_URL)
         
         let request = NSMutableURLRequest(URL: url!)
         request.HTTPMethod = "POST"
@@ -24,54 +28,26 @@ class UserManager {
         } catch {
             return
         }
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request){ (data,response,error) in
-            let result = self.checkIfRequestFailed(response, error: error)
-            guard !result.failed else {
-                fail(result.errorMessage)
-                return
-            }
-            self.processData(data, success: success, fail: fail)
-            
-        }
-        task.resume()
-
+        processRequest(request,success: success,fail: fail)
+        
     }
     
     func loginWithFacebook(token:String,success:([String:AnyObject])->(),fail:(String)->()) {
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://www.udacity.com/api/session")!)
+        let request = NSMutableURLRequest(URL: NSURL(string: SESSION_API_URL)!)
         request.HTTPMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.HTTPBody = "{\"facebook_mobile\": {\"access_token\": \"\(token)\"}}".dataUsingEncoding(NSUTF8StringEncoding)
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            let result = self.checkIfRequestFailed(response, error: error)
-            guard !result.failed else {
-                fail(result.errorMessage)
-                return
-            }
-            self.processData(data, success: success, fail: fail)
-        }
-        task.resume()
+        processRequest(request,success: success,fail: fail)
     }
     
     func getUserData(userId:String,success:([String:AnyObject])->(),fail:(String)->()) {
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://www.udacity.com/api/users/\(userId)")!)
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            let result = self.checkIfRequestFailed(response, error: error)
-            guard !result.failed else {
-                fail(result.errorMessage)
-                return
-            }
-            self.processData(data, success: success, fail: fail)
-        }
-        task.resume()
+        let request = NSMutableURLRequest(URL: NSURL(string: "\(USERS_API_BASE_URL)\(userId)")!)
+        processRequest(request,success: success,fail: fail)
     }
     
     func logout(success:([String:AnyObject])->(),fail:(String)->()) {
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://www.udacity.com/api/session")!)
+        let request = NSMutableURLRequest(URL: NSURL(string: SESSION_API_URL)!)
         request.HTTPMethod = "DELETE"
         var xsrfCookie: NSHTTPCookie? = nil
         let sharedCookieStorage = NSHTTPCookieStorage.sharedHTTPCookieStorage()
@@ -81,14 +57,19 @@ class UserManager {
         if let xsrfCookie = xsrfCookie {
             request.setValue(xsrfCookie.value, forHTTPHeaderField: "X-XSRF-TOKEN")
         }
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
+        processRequest(request,success: success,fail: fail)
+    }
+    
+    func processRequest(request:NSMutableURLRequest,success:([String:AnyObject])->(),fail:(String)->()) {
+        
+        let task = session.dataTaskWithRequest(request){ (data,response,error) in
             let result = self.checkIfRequestFailed(response, error: error)
             guard !result.failed else {
                 fail(result.errorMessage)
                 return
             }
             self.processData(data, success: success, fail: fail)
+            
         }
         task.resume()
     }
