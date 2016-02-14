@@ -21,10 +21,15 @@ class InfoPostViewController: UIViewController {
     
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     var info:[String:AnyObject]!
+    var savedButtonHolderTop:CGFloat!
+    var savedButtonHolderBottom:CGFloat!
     
     @IBAction func cancel(sender: UIBarButtonItem) {
         returnToTabView()
     }
+    
+    @IBOutlet weak var buttonHolderTop: NSLayoutConstraint!
+    @IBOutlet weak var buttonHolderBottom: NSLayoutConstraint!
     
     @IBAction func findOnMap(sender: UIButton) {
         let appDelegate = (UIApplication.sharedApplication().delegate as? AppDelegate)!
@@ -97,8 +102,7 @@ class InfoPostViewController: UIViewController {
     }
     
     func returnToTabView() {
-        let controller = self.storyboard?.instantiateViewControllerWithIdentifier("TabBarController")
-        self.presentViewController(controller!, animated: true, completion: nil)
+        dismissViewControllerAnimated(true, completion: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -108,19 +112,66 @@ class InfoPostViewController: UIViewController {
         urlTextField.hidden = true
         
         info = [String:AnyObject]()
-        activityIndicator.hidden = true
+        activityIndicator.hidesWhenStopped = true
+        subscribeToKeyBoardNotifications()
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        unsubscribeYoKeyBoardNotifications()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let tapGesture = UITapGestureRecognizer(target: self, action: "stopEditing")
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    func stopEditing() {
+        view.endEditing(true)
     }
     
     func showActivityIndicator() {
         view.alpha = 0.5
-        activityIndicator.hidden = false
+        view.endEditing(true)
         activityIndicator.startAnimating()
     }
     
     func hideActivityIndicator() {
         view.alpha = 1.0
-        self.activityIndicator.hidden = true
-        self.activityIndicator.stopAnimating()
+        activityIndicator.stopAnimating()
     }
     
+    func keyBoardWillShow(notification:NSNotification) {
+        savedButtonHolderTop = buttonHolderTop.constant
+        savedButtonHolderBottom = buttonHolderBottom.constant
+        print(buttonHolderBottom.constant)
+        buttonHolderTop.constant = placeTextfield.frame.origin.y + placeTextfield.frame.height + 8
+        buttonHolderBottom.constant = getKeyboardHeight(notification)
+    }
+    func keyBoardWillHide(notification:NSNotification) {
+        if let num = savedButtonHolderTop {
+            buttonHolderTop.constant = num
+            savedButtonHolderTop = nil
+        }
+        if let num = savedButtonHolderBottom {
+            buttonHolderBottom.constant = num
+            savedButtonHolderBottom = nil
+        }
+    }
+    
+    func subscribeToKeyBoardNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyBoardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyBoardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+    }
+    func unsubscribeYoKeyBoardNotifications(){
+        NSNotificationCenter.defaultCenter().removeObserver(self,name: UIKeyboardWillShowNotification,object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self,name: UIKeyboardWillHideNotification,object: nil)
+    }
+    
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat{
+        let userinfo = notification.userInfo
+        let keyboardSize = userinfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
+        return keyboardSize.CGRectValue().height
+    }
 }

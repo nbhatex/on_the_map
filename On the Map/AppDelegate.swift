@@ -8,6 +8,7 @@
 
 import UIKit
 import FBSDKCoreKit
+import FBSDKLoginKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var lastName:String!
     var firstName:String!
     var userId:String!
+    
+    var fbLoginManager:FBSDKLoginManager!
 
     func showAlert(parent:UIViewController,title:String,message:String){
         let alert = UIAlertController(title: title, message: message, preferredStyle: .Alert)
@@ -27,6 +30,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func logOut(sender:UIViewController) {
+        if fbLoginManager != nil {
+            fbLoginManager.logOut()
+        }
+        
         let userManager = UserManager()
         userManager.logout({(data) in
             dispatch_async(dispatch_get_main_queue()) {

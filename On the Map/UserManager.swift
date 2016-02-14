@@ -8,10 +8,10 @@
 
 import Foundation
 
-let SESSION_API_URL = "https://www.udacity.com/api/session"
-let USERS_API_BASE_URL = "https://www.udacity.com/api/users/"
 
 class UserManager {
+    let SESSION_API_URL = "https://www.udacity.com/api/session"
+    let USERS_API_BASE_URL = "https://www.udacity.com/api/users/"
     
     let session = NSURLSession.sharedSession()
     

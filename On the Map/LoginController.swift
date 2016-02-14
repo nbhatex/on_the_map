@@ -25,19 +25,26 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         let tapGesture = UITapGestureRecognizer(target: self, action: "tapSignUp")
         signUpLabel.addGestureRecognizer(tapGesture)
+        view.addGestureRecognizer(UITapGestureRecognizer(target: self,action:  "stopEditing"))
         messageLabel.numberOfLines = 0
     }
     
     override func viewWillAppear(animated: Bool) {
-        activityIndicator.hidden = true
+        super.viewDidAppear(animated)
+        activityIndicator.hidesWhenStopped = true
     }
     
     func tapSignUp(){
         UIApplication.sharedApplication().openURL(NSURL(string: "https://www.udacity.com/account/auth#!/signin.")!)
     }
     
+    func stopEditing() {
+        view.endEditing(true)
+    }
+    
 
     @IBAction func clickLogin(sender: AnyObject) {
+        view.endEditing(true)
         
         messageLabel.text = ""
         
@@ -70,8 +77,8 @@ class ViewController: UIViewController {
             return
         }
         
-        let fbLoginManager  = FBSDKLoginManager()
-        fbLoginManager.logInWithReadPermissions(["public_profile"], fromViewController: self, handler: {(facebookResult, facebookError) -> Void in
+        appDelegate.fbLoginManager  = FBSDKLoginManager()
+        appDelegate.fbLoginManager.logInWithReadPermissions(["public_profile"], fromViewController: self, handler: {(facebookResult, facebookError) -> Void in
             guard facebookError == nil else {
                 self.handleFailure(facebookError.localizedDescription)
                 return
@@ -83,6 +90,7 @@ class ViewController: UIViewController {
             self.startActivityIndicator()
             self.userManager.loginWithFacebook(FBSDKAccessToken.currentAccessToken().tokenString,success: self.handleLoginSuccess,fail: self.handleFailure)
         })
+        
         
         
     }
@@ -114,14 +122,12 @@ class ViewController: UIViewController {
     
     func startActivityIndicator() {
         view.alpha = 0.5
-        activityIndicator.hidden = false
         activityIndicator.startAnimating()
     }
     
     func stopAndHideActivityIndicator() {
         view.alpha = 1.0
         activityIndicator.stopAnimating()
-        activityIndicator.hidden = true
     }
 
 }

@@ -24,8 +24,8 @@ struct StudentInformation {
     var mediaURL:String
     var latitude:Float
     var longitude:Float
-    var createdAt:NSDate
-    var updatedAt:NSDate
+    var createdAt:NSDate?
+    var updatedAt:NSDate?
     
     init(dictionary: [String : AnyObject]){
         if let id = dictionary["objectId"] {
@@ -45,12 +45,12 @@ struct StudentInformation {
         if let cat = dictionary["createdAt"] {
             createdAt = dateFormatter.dateFromString( cat as! String)!
         } else {
-            createdAt = NSDate()
+            createdAt = nil
         }
         if let uat = dictionary["updatedAt"] {
             updatedAt = dateFormatter.dateFromString(uat as! String)!
         } else {
-            updatedAt = NSDate()
+            updatedAt = nil
         }
         
     }
@@ -60,7 +60,7 @@ struct StudentInformation {
         for result in results {
             studentInformations.append(StudentInformation(dictionary: result ))
         }
-        studentInformations.sortInPlace({ return $0.updatedAt.compare($1.updatedAt) == NSComparisonResult.OrderedDescending })
+        studentInformations.sortInPlace({ return $0.updatedAt!.compare($1.updatedAt!) == NSComparisonResult.OrderedDescending })
 
         return studentInformations
     }

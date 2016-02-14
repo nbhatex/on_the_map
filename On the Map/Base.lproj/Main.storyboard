@@ -288,7 +288,6 @@
                             <constraint firstItem="Bva-Dt-FBU" firstAttribute="top" secondItem="s5b-DN-7h5" secondAttribute="bottom" id="m0r-ib-Mem"/>
                             <constraint firstAttribute="bottomMargin" secondItem="5Os-TY-Zfv" secondAttribute="bottom" constant="-5" id="rNj-Oj-7fU"/>
                             <constraint firstItem="4VM-It-mD0" firstAttribute="top" secondItem="hDL-UU-Ssl" secondAttribute="bottom" constant="82" id="uyo-Jb-bOE"/>
-                            <constraint firstItem="5Os-TY-Zfv" firstAttribute="top" secondItem="Bva-Dt-FBU" secondAttribute="bottom" constant="314" id="vcL-Eb-vsS"/>
                             <constraint firstAttribute="trailingMargin" secondItem="5Os-TY-Zfv" secondAttribute="trailing" constant="-20" id="wjg-Hh-e3o"/>
                             <constraint firstItem="K7C-VC-RBp" firstAttribute="centerY" secondItem="iar-bI-Gtl" secondAttribute="centerY" id="wty-UP-GQd"/>
                             <constraint firstItem="jfh-L5-5zG" firstAttribute="leading" secondItem="iar-bI-Gtl" secondAttribute="leadingMargin" constant="232" id="yCn-Ch-LD4"/>
@@ -298,12 +297,13 @@
                             <mask key="constraints">
                                 <exclude reference="ZLt-aq-Rk3"/>
                                 <exclude reference="yCn-Ch-LD4"/>
-                                <exclude reference="vcL-Eb-vsS"/>
                             </mask>
                         </variation>
                     </view>
                     <connections>
                         <outlet property="activityIndicator" destination="K7C-VC-RBp" id="FV4-wU-ib4"/>
+                        <outlet property="buttonHolderBottom" destination="rNj-Oj-7fU" id="Hcw-NJ-o62"/>
+                        <outlet property="buttonHolderTop" destination="26l-oo-h5A" id="rdB-Qw-jsW"/>
                         <outlet property="buttonHolderView" destination="5Os-TY-Zfv" id="IfY-6A-nSS"/>
                         <outlet property="mapView" destination="3yh-sJ-34p" id="q4e-3N-h1H"/>
                         <outlet property="placeTextfield" destination="jfh-L5-5zG" id="rCH-vO-dYn"/>
@@ -324,12 +324,28 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="studentLocationCell" id="XaH-lp-TxZ">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="studentLocationCell" textLabel="jPc-ez-PfN" detailTextLabel="jRa-iw-HzU" style="IBUITableViewCellStyleSubtitle" id="XaH-lp-TxZ">
                                 <rect key="frame" x="0.0" y="28" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="XaH-lp-TxZ" id="TV3-Ub-Brr">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="jPc-ez-PfN">
+                                            <rect key="frame" x="15" y="5" width="32" height="20"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="jRa-iw-HzU">
+                                            <rect key="frame" x="15" y="25" width="41" height="14"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
                                 </tableViewCellContentView>
                             </tableViewCell>
                         </prototypes>
